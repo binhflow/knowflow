@@ -25,7 +25,7 @@ SECRET_KEY = 'd(l4gk6(6^@&##50cd#6fumyeiz5&r12s_$!al6sh6*2tcr(4+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -74,16 +74,48 @@ WSGI_APPLICATION = 'knowflow.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'knowflow',
-        'USER': 'admin',
-        'PASSWORD': '123banhbao',
-        'HOST': 'localhost',
-        'PORT': '',
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'knowflow',
+#         'USER': 'admin',
+#         'PASSWORD': '123banhbao',
+#         'HOST': 'localhost',
+#         'PORT': '',
+#     }
+# }
+import pymysql  # noqa: 402
+pymysql.install_as_MySQLdb()
+
+if os.getenv('GAE_APPLICATION', None):
+    # Running on production App Engine, so connect to Google Cloud SQL using
+    # the unix socket at /cloudsql/<your-cloudsql-connection string>
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '/cloudsql/knowflow:asia-southeast1:kf',
+            'USER': 'admin',
+            'PASSWORD': '123banhbao',
+            'NAME': 'kf_table',
+        }
     }
-}
+else:
+    # Running locally so connect to either a local MySQL instance or connect to
+    # Cloud SQL via the proxy. To start the proxy via command line:
+    #
+    #     $ cloud_sql_proxy -instances=[INSTANCE_CONNECTION_NAME]=tcp:3306
+    #
+    # See https://cloud.google.com/sql/docs/mysql-connect-proxy
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
+            'NAME': 'kf_table',
+            'USER': 'admin',
+            'PASSWORD': '123banhbao',
+        }
+    }
 
 
 # Password validation
@@ -123,4 +155,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+STATIC_ROOT = 'static/'
